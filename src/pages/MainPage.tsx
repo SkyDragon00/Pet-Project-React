@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import type { Game } from '../types/Game';
 import SearchBar from '../components/SearchBar';
 import GameList from '../components/GameList';
+import { rawgApi } from '../services/rawgApi';
 import './MainPage.css';
 
 interface MainPageProps {
@@ -10,25 +11,46 @@ interface MainPageProps {
   error?: string;
 }
 
-const MainPage: React.FC<MainPageProps> = ({ games, loading, error }) => {
+const MainPage: React.FC<MainPageProps> = ({ games: initialGames, loading: initialLoading, error: initialError }) => {
+  const [displayGames, setDisplayGames] = useState<Game[]>(initialGames);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const filteredGames = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return games;
+  useEffect(() => {
+    if (!isSearching) {
+      setDisplayGames(initialGames);
     }
-    
-    const query = searchQuery.toLowerCase();
-    return games.filter(game => 
-      game.name.toLowerCase().includes(query) ||
-      game.developer?.toLowerCase().includes(query) ||
-      game.genres?.some(genre => genre.toLowerCase().includes(query))
-    );
-  }, [games, searchQuery]);
+  }, [initialGames, isSearching]);
 
-  const handleSearch = (query: string) => {
+  const handleSearch = useCallback(async (query: string) => {
     setSearchQuery(query);
-  };
+    
+    if (!query.trim()) {
+      setIsSearching(false);
+      setDisplayGames(initialGames);
+      setSearchError(null);
+      return;
+    }
+
+    try {
+      setSearchLoading(true);
+      setSearchError(null);
+      setIsSearching(true);
+      
+      const response = await rawgApi.searchGames(query, { page_size: 40 });
+      setDisplayGames(response.results);
+    } catch (err) {
+      setSearchError(err instanceof Error ? err.message : 'Failed to search games');
+      console.error('Error searching games:', err);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, [initialGames]);
+
+  const currentLoading = isSearching ? searchLoading : initialLoading;
+  const currentError = isSearching ? searchError : initialError;
 
   return (
     <div className="main-page">
@@ -46,16 +68,23 @@ const MainPage: React.FC<MainPageProps> = ({ games, loading, error }) => {
         {searchQuery && (
           <div className="search-results-header">
             <h2>Search Results for "{searchQuery}"</h2>
-            {filteredGames.length === 0 && !loading && (
+            {displayGames.length === 0 && !currentLoading && !currentError && (
               <p>No games found matching your search.</p>
             )}
           </div>
         )}
         
+        {!searchQuery && !initialLoading && (
+          <div className="section-header">
+            <h2>Popular Games</h2>
+            <p>Discover the most highly rated games</p>
+          </div>
+        )}
+        
         <GameList 
-          games={filteredGames}
-          loading={loading}
-          error={error}
+          games={displayGames}
+          loading={currentLoading}
+          error={currentError || undefined}
         />
       </div>
     </div>

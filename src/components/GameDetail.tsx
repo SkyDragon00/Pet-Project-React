@@ -1,15 +1,36 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import type { Game } from '../types/Game';
+import { gameUtils } from '../services/rawgApi';
 import './GameDetail.css';
 
 interface GameDetailProps {
-  games: Game[];
+  game: Game | null;
+  loading?: boolean;
+  error?: string;
 }
 
-const GameDetail: React.FC<GameDetailProps> = ({ games }) => {
-  const { id } = useParams<{ id: string }>();
-  const game = games.find(g => g.id === Number(id));
+const GameDetail: React.FC<GameDetailProps> = ({ game, loading, error }) => {
+  if (loading) {
+    return (
+      <div className="game-detail-loading">
+        <div className="loading-spinner"></div>
+        <p>Loading game details...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="game-detail-error">
+        <h2>Error loading game</h2>
+        <p>{error}</p>
+        <Link to="/" className="back-button">
+          Back to Store
+        </Link>
+      </div>
+    );
+  }
 
   if (!game) {
     return (
@@ -22,6 +43,14 @@ const GameDetail: React.FC<GameDetailProps> = ({ games }) => {
       </div>
     );
   }
+
+  const gameImage = gameUtils.getGameImage(game);
+  const platforms = gameUtils.getPlatformNames(game);
+  const genres = gameUtils.getGenreNames(game);
+  const developers = gameUtils.getDeveloperNames(game);
+  const publishers = gameUtils.getPublisherNames(game);
+  const releaseDate = gameUtils.getFormattedReleaseDate(game);
+  const screenshots = gameUtils.getScreenshots(game);
 
   return (
     <div className="game-detail">
@@ -37,19 +66,27 @@ const GameDetail: React.FC<GameDetailProps> = ({ games }) => {
           <div className="game-media">
             <div className="game-main-image">
               <img 
-                src={game.image || '/placeholder-game.jpg'} 
+                src={gameImage || '/placeholder-game.jpg'} 
                 alt={game.name}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder-game.jpg';
+                }}
               />
             </div>
-            {game.screenshots && game.screenshots.length > 0 && (
+            {screenshots.length > 0 && (
               <div className="game-screenshots">
                 <h3>Screenshots</h3>
                 <div className="screenshots-grid">
-                  {game.screenshots.map((screenshot, index) => (
+                  {screenshots.slice(0, 6).map((screenshot, index) => (
                     <img 
                       key={index}
                       src={screenshot} 
                       alt={`${game.name} screenshot ${index + 1}`}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
                     />
                   ))}
                 </div>
@@ -60,60 +97,62 @@ const GameDetail: React.FC<GameDetailProps> = ({ games }) => {
           <div className="game-info">
             <div className="game-purchase">
               <div className="game-price">
-                {game.price === 0 ? (
-                  <span className="price-free">Free to Play</span>
-                ) : (
-                  <span className="price-amount">${game.price?.toFixed(2)}</span>
-                )}
+                <span className="price-free">Free to Play</span>
               </div>
               <button className="purchase-button">
-                {game.price === 0 ? 'Play Game' : 'Add to Cart'}
+                View on Store
               </button>
             </div>
 
             <div className="game-details">
-              {game.description && (
+              {game.description_raw && (
                 <div className="detail-section">
                   <h3>About This Game</h3>
-                  <p>{game.description}</p>
+                  <p>{game.description_raw}</p>
                 </div>
               )}
 
               <div className="detail-section">
                 <h3>Game Details</h3>
                 <div className="detail-grid">
-                  {game.developer && (
+                  {developers.length > 0 && (
                     <div className="detail-item">
                       <span className="detail-label">Developer:</span>
-                      <span className="detail-value">{game.developer}</span>
+                      <span className="detail-value">{developers.join(', ')}</span>
                     </div>
                   )}
-                  {game.publisher && (
+                  {publishers.length > 0 && (
                     <div className="detail-item">
                       <span className="detail-label">Publisher:</span>
-                      <span className="detail-value">{game.publisher}</span>
+                      <span className="detail-value">{publishers.join(', ')}</span>
                     </div>
                   )}
-                  {game.releaseDate && (
+                  {game.released && (
                     <div className="detail-item">
                       <span className="detail-label">Release Date:</span>
-                      <span className="detail-value">{game.releaseDate}</span>
+                      <span className="detail-value">{releaseDate}</span>
                     </div>
                   )}
-                  {game.platforms && (
+                  {platforms.length > 0 && (
                     <div className="detail-item">
                       <span className="detail-label">Platforms:</span>
-                      <span className="detail-value">{game.platforms.join(', ')}</span>
+                      <span className="detail-value">{platforms.join(', ')}</span>
+                    </div>
+                  )}
+                  {game.metacritic && (
+                    <div className="detail-item">
+                      <span className="detail-label">Metacritic Score:</span>
+                      <span className="detail-value">{game.metacritic}/100</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              {game.genres && game.genres.length > 0 && (
+              {genres.length > 0 && (
                 <div className="detail-section">
                   <h3>Genres</h3>
                   <div className="genres-list">
-                    {game.genres.map((genre, index) => (
+                    {genres.map((genre, index) => (
                       <span key={index} className="genre-tag">
                         {genre}
                       </span>
@@ -126,14 +165,22 @@ const GameDetail: React.FC<GameDetailProps> = ({ games }) => {
                 <div className="detail-section">
                   <h3>User Reviews</h3>
                   <div className="rating-display">
-                    <span className="rating-score">{game.rating}/10</span>
+                    <span className="rating-score">{game.rating.toFixed(1)}/5</span>
                     <span className="rating-text">
-                      {game.rating >= 8 ? 'Overwhelmingly Positive' :
-                       game.rating >= 7 ? 'Very Positive' :
-                       game.rating >= 6 ? 'Mostly Positive' :
-                       game.rating >= 5 ? 'Mixed' : 'Mostly Negative'}
+                      ({game.ratings_count} reviews)
                     </span>
+                    {game.rating >= 4 ? ' - Overwhelmingly Positive' :
+                     game.rating >= 3.5 ? ' - Very Positive' :
+                     game.rating >= 3 ? ' - Mostly Positive' :
+                     game.rating >= 2.5 ? ' - Mixed' : ' - Mostly Negative'}
                   </div>
+                </div>
+              )}
+
+              {game.playtime > 0 && (
+                <div className="detail-section">
+                  <h3>Average Playtime</h3>
+                  <p>{game.playtime} hours</p>
                 </div>
               )}
             </div>
