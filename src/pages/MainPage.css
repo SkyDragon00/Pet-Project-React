@@ -1,18 +1,19 @@
 .main-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
+  background: linear-gradient(135deg, #2d1b69 0%, #6a4c93 50%, #c77dff 100%);
 }
 
 .hero-section {
   background: linear-gradient(
-    rgba(27, 40, 56, 0.8),
-    rgba(27, 40, 56, 0.8)
+    rgba(45, 27, 105, 0.85),
+    rgba(106, 76, 147, 0.85)
   ), url('/hero-bg.jpg');
   background-size: cover;
   background-position: center;
   padding: 4rem 0;
   text-align: center;
   color: #ffffff;
+  box-shadow: inset 0 0 100px rgba(199, 125, 255, 0.1);
 }
 
 .hero-content {
@@ -25,18 +26,20 @@
   font-size: 3.5rem;
   font-weight: 700;
   margin: 0 0 1rem 0;
-  background: linear-gradient(45deg, #66c0f4, #beee11);
+  background: linear-gradient(45deg, #ff69b4, #c77dff, #e0aaff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   line-height: 1.2;
+  text-shadow: 0 0 30px rgba(255, 105, 180, 0.3);
 }
 
 .hero-subtitle {
   font-size: 1.25rem;
   margin: 0 0 3rem 0;
-  color: #c7d5e0;
+  color: #e0aaff;
   line-height: 1.6;
+  text-shadow: 0 2px 10px rgba(224, 170, 255, 0.3);
 }
 
 .featured-section {
@@ -51,15 +54,17 @@
 }
 
 .search-results-header h2 {
-  color: #ffffff;
+  color: #e0aaff;
   font-size: 2rem;
   margin: 0 0 1rem 0;
+  text-shadow: 0 2px 10px rgba(224, 170, 255, 0.4);
 }
 
 .search-results-header p {
-  color: #c7d5e0;
+  color: #c77dff;
   font-size: 1.1rem;
   margin: 0;
+  text-shadow: 0 1px 5px rgba(199, 125, 255, 0.3);
 }
 
 @media (max-width: 768px) {

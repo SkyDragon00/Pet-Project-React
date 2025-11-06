@@ -1,17 +1,17 @@
 .game-card {
-  background: linear-gradient(135deg, #1e2328 0%, #2a475e 100%);
+  background: linear-gradient(135deg, #2d1b69 0%, #6a4c93 100%);
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.3s ease;
   text-decoration: none;
   color: inherit;
   display: block;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 15px rgba(199, 125, 255, 0.2);
 }
 
 .game-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 30px rgba(255, 105, 180, 0.4), 0 0 20px rgba(199, 125, 255, 0.3);
 }
 
 .game-card-image {
@@ -58,7 +58,7 @@
 }
 
 .genre-tag {
-  background-color: rgba(102, 192, 244, 0.8);
+  background-color: rgba(255, 105, 180, 0.8);
   color: #ffffff;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -86,13 +86,13 @@
 }
 
 .game-card-developer {
-  color: #8f98a0;
+  color: #c77dff;
   font-size: 0.9rem;
   margin: 0;
 }
 
 .game-card-price {
-  color: #66c0f4;
+  color: #ff69b4;
   font-weight: 600;
   font-size: 1.1rem;
 }
@@ -102,8 +102,8 @@
 }
 
 .rating-text {
-  background-color: #4c6b22;
-  color: #beee11;
+  background-color: #6a4c93;
+  color: #e0aaff;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.8rem;
