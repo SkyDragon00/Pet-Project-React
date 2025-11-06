@@ -6,10 +6,19 @@ import MainPage from '../pages/MainPage'
 import { rawgApi } from '../services/rawgApi'
 import type { Game } from '../types/Game'
 
-// Mock the rawgApi
+// Mock the rawgApi and gameUtils
 vi.mock('../services/rawgApi', () => ({
   rawgApi: {
     searchGames: vi.fn()
+  },
+  gameUtils: {
+    getGameImage: vi.fn((game) => game.background_image || ''),
+    getGenreNames: vi.fn((game) => game.genres?.map((g: any) => g.name) || []),
+    getDeveloperNames: vi.fn((game) => game.developers?.map((d: any) => d.name) || []),
+    getPlatformNames: vi.fn((game) => game.parent_platforms?.map((p: any) => p.platform.name) || []),
+    getPublisherNames: vi.fn((game) => game.publishers?.map((p: any) => p.name) || []),
+    getFormattedReleaseDate: vi.fn((game) => game.released || 'TBA'),
+    getScreenshots: vi.fn((game) => game.short_screenshots?.map((s: any) => s.image) || [])
   }
 }))
 
@@ -219,7 +228,7 @@ describe('MainPage', () => {
 
   it('should show "no results" message when search returns empty results', async () => {
     const user = userEvent.setup()
-    const mockSearchResults = { results: [] }
+    const mockSearchResults = { count: 0, results: [] }
     
     vi.mocked(rawgApi.searchGames).mockResolvedValue(mockSearchResults)
     
@@ -240,7 +249,7 @@ describe('MainPage', () => {
 
   it('should return to original games when clearing search', async () => {
     const user = userEvent.setup()
-    const mockSearchResults = { results: [] }
+    const mockSearchResults = { count: 0, results: [] }
     
     vi.mocked(rawgApi.searchGames).mockResolvedValue(mockSearchResults)
     
